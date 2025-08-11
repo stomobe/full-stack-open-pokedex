@@ -1,7 +1,7 @@
 name: Deployment pipeline
 
 env:
-  CAN_BE_DEPLOYED: ${{ github.event_name == 'push' && !contains( join(github.event.commits.*.message, ', '), '#skip' ) }}
+  CAN_BE_DEPLOYED: ${{ github.event_name == 'push' && !contains( join(toJson(github.event.commits.*.message), ', '), '#skip' ) }}
 
 on:
   push:
@@ -47,15 +47,14 @@ jobs:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
 
   tag_release:
+    if: ${{ github.env.CAN_BE_DEPLOYED == true }}
     needs: [simple_deployment_pipeline]
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
       - uses: actions/checkout@v4
-        if: ${{ env.CAN_BE_DEPLOYED == true }}
       - name: Bump version and push tag
-        if: ${{ env.CAN_BE_DEPLOYED == true }}
         uses: anothrNick/github-tag-action@1.73.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
