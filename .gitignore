@@ -1,8 +1,6 @@
 dist/
 node_modules/
 
-fly.toml
-
 # Playwright
 /test-results/
 /playwright-report/
