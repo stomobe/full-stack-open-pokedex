@@ -78,3 +78,9 @@ jobs:
         run: echo ${{ github.event_name == 'push' }}
       - name: combined condition
         run: echo ${{ env.CAN_BE_DEPLOYED }}
+      - name: combined condition
+        if: ${{ env.CAN_BE_DEPLOYED }}
+        run: echo "would be pushed"
+      - name: combined condition fail
+        if: ${{ !env.CAN_BE_DEPLOYED }}
+        run: echo "contains skip or is not merge action"
