@@ -76,3 +76,5 @@ jobs:
         run: echo ${{ !contains( join(github.event.commits.*.message, ', '), '#skip' ) }}
       - name: push
         run: echo ${{ github.event_name == 'push' }}
+      - name: combined condition
+        run: echo ${{ env.CAN_BE_DEPLOYED }}
