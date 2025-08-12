@@ -72,7 +72,7 @@ jobs:
         run: echo "$COMMIT_MESSAGES"
       - name: contains
         run: echo ${{ contains( join(github.event.commits.*.message, ', '), '#skip' ) }}
-        if: ${{ github.env.CAN_BE_DEPLOYED == false }}
-      - name: no contains
-        run: echo ${{ contains( join(github.event.commits.*.message, ', '), '#skip' ) }}
-        if: ${{ github.env.CAN_BE_DEPLOYED == true }}
+      - name: not contains
+        run: echo ${{ !contains( join(github.event.commits.*.message, ', '), '#skip' ) }}
+      - name: push
+        run: echo ${{ github.event_name == 'push' }}
