@@ -12,75 +12,51 @@ on:
     types: [opened, synchronize]
 
 jobs:
-#   simple_deployment_pipeline:
-#     runs-on: ubuntu-latest
-#     concurrency: deploy-group    # optional: ensure only one action runs at a time
-#     steps:
-#       - uses: actions/checkout@v4
-#       - uses: actions/setup-node@v4
-#         with:
-#           node-version: '20'
-#       - name: Install dependencies
-#         run: npm install
-#       - name: Check style
-#         run: npm run eslint
-#       - name: build
-#         run: npm run build
-#       - name: test
-#         run: npm test
-#       - name: Install Playwright Browser
-#         run: npx playwright install --with-deps
-#       - name: test e2e
-#         run: npm run test:e2e
-#       - uses: actions/upload-artifact@v4
-#         if: ${{ !cancelled() }}
-#         with:
-#           name: playwright-report
-#           path: playwright-report/
-#           retention-days: 30
-#       - uses: superfly/flyctl-actions/setup-flyctl@master
-#         if: ${{ env.CAN_BE_DEPLOYED == true }}
-#       - name: fly deploy app
-#         if: ${{ env.CAN_BE_DEPLOYED == true }}
-#         run: flyctl deploy --remote-only
-#         env:
-#           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
-
-#   tag_release:
-#     if: ${{ github.env.CAN_BE_DEPLOYED == true }}
-#     needs: [simple_deployment_pipeline]
-#     runs-on: ubuntu-latest
-#     permissions:
-#       contents: write
-#     steps:
-#       - uses: actions/checkout@v4
-#       - name: Bump version and push tag
-#         uses: anothrNick/github-tag-action@1.73.0
-#         env:
-#           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#           DEFAULT_BUMP: patch
-
-#           TAG_PREFIX: v
-
-  test_job:
+  simple_deployment_pipeline:
     runs-on: ubuntu-latest
+    concurrency: deploy-group    # optional: ensure only one action runs at a time
     steps:
       - uses: actions/checkout@v4
-      - name: commit messages
-        env:
-          COMMIT_MESSAGES: ${{ join(github.event.commits.*.message, ', ') }}
-        run: echo "$COMMIT_MESSAGES"
-      - name: contains
-        run: echo ${{ contains( join(github.event.commits.*.message, ', '), '#skip' ) }}
-      - name: not contains
-        run: echo ${{ !contains( join(github.event.commits.*.message, ', '), '#skip' ) }}
-      - name: push
-        run: echo ${{ github.event_name == 'push' }}
-      - name: combined condition
-        run: echo ${{ env.CAN_BE_DEPLOYED }}
-      - name: combined condition
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install dependencies
+        run: npm install
+      - name: Check style
+        run: npm run eslint
+      - name: build
+        run: npm run build
+      - name: test
+        run: npm test
+      - name: Install Playwright Browser
+        run: npx playwright install --with-deps
+      - name: test e2e
+        run: npm run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30
+      - uses: superfly/flyctl-actions/setup-flyctl@master
         if: ${{ env.CAN_BE_DEPLOYED == 'true' }}
-        run: echo "would be pushed"
-      - name: combined condition fail
-        if: ${{ env.CAN_BE_DEPLOYED == 'false' }}
-        run: echo "contains skip or is not merge action"
+      - name: fly deploy app
+        if: ${{ env.CAN_BE_DEPLOYED == 'true' }}
+        run: flyctl deploy --remote-only
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+
+  tag_release:
+    if: ${{ github.env.CAN_BE_DEPLOYED == 'true' }}
+    needs: [simple_deployment_pipeline]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Bump version and push tag
+        uses: anothrNick/github-tag-action@1.73.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DEFAULT_BUMP: patch
+          TAG_PREFIX: v
