@@ -46,23 +46,19 @@ jobs:
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
       - name: Deploy success
-        uses: rjstone/discord-webhook-notify@v2
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        uses: Ilshidur/action-discord@ad5235de713df3ef38022185499b02ffe93b7efe
         if: ${{ success() }}
         with:
-          webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
-          username: GitHub
-          avatarUrl: https://github.githubassets.com/assets/GitHub-Mark-ea2971cee799.png
-          text: A new version of Pokedex deployed
-          severity: info # only to make sure the embed is added
+          args: 'The project {{ EVENT_PAYLOAD.repository.full_name }} has been deployed.'
       - name: Deploy failure
-        uses: rjstone/discord-webhook-notify@v2
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        uses: Ilshidur/action-discord@ad5235de713df3ef38022185499b02ffe93b7efe
         if: ${{ failure() }}
         with:
-          webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
-          username: GitHub
-          avatarUrl: https://github.githubassets.com/assets/GitHub-Mark-ea2971cee799.png
-          text: Build failed
-          severity: error
+          args: 'The project {{ EVENT_PAYLOAD.repository.full_name }} failed to deploy.'
 
 
   tag_release:
